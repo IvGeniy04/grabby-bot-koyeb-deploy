@@ -1,0 +1,7 @@
+.code/
+.direnv/
+.pre-commit-config.yaml
+downloads/
+result
+target/
+config.toml

@@ -1,0 +1,11 @@
+# Ignore git directory
+.git
+
+# Ignore the build artifacts directory
+target
+
+# Ignore nix files
+flake.nix
+flake.lock
+nix
+.envrc

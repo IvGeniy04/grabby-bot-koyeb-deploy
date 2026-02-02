@@ -1,0 +1,156 @@
+{
+  config,
+  lib,
+  pkgs,
+  package ? null,
+  ...
+}:
+
+let
+  cfg = config.services.grabby;
+
+  tomlFormat = pkgs.formats.toml { };
+
+  configFile = tomlFormat.generate "grabby-config.toml" {
+    logging.level = cfg.logLevel;
+    servers = map (server: {
+      server_id = server.serverId;
+      auto_embed_channels = server.autoEmbedChannels;
+      embed_enabled = server.embedEnabled;
+      disabled_domains = server.disabledDomains;
+    }) cfg.servers;
+  };
+in
+{
+  options.services.grabby = {
+    enable = lib.mkEnableOption "Grabby - Media Embedding Discord Bot";
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = package;
+      description = "Package for the Grabby bot";
+    };
+
+    environmentFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "Path to file containing environment variables (e.g., DISCORD_TOKEN), compatible with sops-nix";
+      example = "/run/secrets/grabby-env";
+    };
+
+    logLevel = lib.mkOption {
+      type = lib.types.enum [
+        "error"
+        "warn"
+        "info"
+        "debug"
+        "trace"
+      ];
+      default = "info";
+      description = "Log level for the grabby bot";
+    };
+
+    servers = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.submodule {
+          options = {
+            serverId = lib.mkOption {
+              type = lib.types.str;
+              description = "Discord server ID";
+              example = "123456789";
+            };
+
+            autoEmbedChannels = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              description = "List of channel IDs where auto-embed is enabled";
+              example = [
+                "channel1"
+                "channel2"
+              ];
+            };
+
+            embedEnabled = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Enable embed for this server";
+            };
+
+            disabledDomains = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              description = "List of domains to skip in auto-embed channels (slash command still works)";
+              example = [
+                "example.com"
+                "another-site.org"
+              ];
+            };
+          };
+        }
+      );
+
+      default = [ ];
+      description = "List of server configurations";
+      example = [
+        {
+          serverId = "123456789";
+          autoEmbedChannels = [
+            "channel1"
+            "channel2"
+          ];
+          embedEnabled = true;
+          disabledDomains = [
+            "example.com"
+            "another-site.org"
+          ];
+        }
+      ];
+    };
+
+    user = lib.mkOption {
+      type = lib.types.str;
+      default = "grabby";
+      description = "User account under which grabby runs";
+    };
+
+    group = lib.mkOption {
+      type = lib.types.str;
+      default = "grabby";
+      description = "Group under which grabby runs";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    users.users.${cfg.user} = lib.mkIf (cfg.user == "grabby") {
+      description = "Grabby Discord bot user";
+      isSystemUser = true;
+      group = cfg.group;
+    };
+
+    users.groups.${cfg.group} = lib.mkIf (cfg.group == "grabby") { };
+
+    systemd.services.grabby = {
+      description = "Grabby - Media Embedding Discord Bot";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+
+      serviceConfig = {
+        User = cfg.user;
+        Group = cfg.group;
+        Restart = "on-failure";
+        RestartSec = "5s";
+        ExecStart = "${cfg.package}/bin/grabby --config ${configFile}";
+        EnvironmentFile = lib.mkIf (cfg.environmentFile != null) cfg.environmentFile;
+        ReadWritePaths = [ "/var/lib/grabby" ];
+        WorkingDirectory = "/var/lib/grabby";
+      };
+    };
+
+    systemd.tmpfiles.rules = [
+      "d /var/lib/grabby 0750 ${cfg.user} ${cfg.group} -"
+    ];
+
+    environment.systemPackages = [ cfg.package ];
+  };
+}
