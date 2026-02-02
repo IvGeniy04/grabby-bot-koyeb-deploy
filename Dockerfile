@@ -29,11 +29,11 @@ FROM debian:bookworm-slim
 # ffmpeg is used for auto-resizing media
 # ca-certificates is needed for making HTTPS requests
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    yt-dlp \
-    gallery-dl \
+    python3-pip \
     ffmpeg \
     ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN pip install -U yt-dlp gallery-dl
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /usr/src/grabby/target/release/grabby /usr/local/bin/grabby
