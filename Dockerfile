@@ -15,8 +15,7 @@ WORKDIR /usr/src/grabby
 RUN apt-get update && apt-get install -y pkg-config libssl-dev
 
 # Copy Cargo configuration files
-COPY Cargo.toml Cargo.lock ./
-COPY src ./
+COPY . .
 
 # Build the final application
 RUN cargo build --release
