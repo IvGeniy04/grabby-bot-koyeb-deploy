@@ -2,6 +2,8 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use tracing::info;
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
+use std::thread; // Додано
+use tokio::runtime::Runtime; // Додано
 
 mod bot;
 mod config;
@@ -74,7 +76,13 @@ async fn main() -> Result<()> {
 
     info!("Starting Grabby...");
 
-    tokio::spawn(server::run_web_server());
+    // Запускаємо веб-сервер у окремому потоці з власним Tokio Runtime
+    thread::spawn(|| {
+        let rt = Runtime::new().expect("Failed to create Tokio runtime for web server");
+        rt.block_on(async {
+            server::run_web_server().await.expect("Web server failed to start");
+        });
+    });
 
     if let Some(config_path) = get_config_path(&args) {
         info!("Loading config from: {}", config_path);
