@@ -36,7 +36,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install -U yt-dlp gallery-dl
-ENV PATH="/opt/venv/bin:$PATH" # Додано для пошуку утиліт з venv
+# Додано для пошуку утиліт з venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /usr/src/grabby/target/release/grabby /usr/local/bin/grabby
