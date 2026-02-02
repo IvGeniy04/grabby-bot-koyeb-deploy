@@ -3,7 +3,7 @@
 # --- Builder Stage ---
 # Use an official Rust image as a builder.
 # We use -slim to keep the image size smaller.
-FROM rust:nightly-bookworm as builder
+FROM rust:nightly-slim-bookworm as builder
 
 # Set the working directory
 WORKDIR /usr/src/grabby
