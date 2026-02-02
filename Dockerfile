@@ -30,10 +30,13 @@ FROM debian:bookworm-slim
 # ca-certificates is needed for making HTTPS requests
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
+    python3-venv \
     ffmpeg \
     ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN pip install -U yt-dlp gallery-dl
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install -U yt-dlp gallery-dl
+ENV PATH="/opt/venv/bin:$PATH" # Додано для пошуку утиліт з venv
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /usr/src/grabby/target/release/grabby /usr/local/bin/grabby
