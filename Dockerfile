@@ -37,6 +37,7 @@ FROM debian:bullseye-slim
 # ca-certificates is needed for making HTTPS requests
 RUN apt-get update && apt-get install -y --no-install-recommends \
     yt-dlp \
+    gallery-dl \
     ffmpeg \
     ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
