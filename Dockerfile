@@ -3,7 +3,7 @@
 # --- Builder Stage ---
 # Use an official Rust image as a builder.
 # We use -slim to keep the image size smaller.
-FROM rust:1.79-slim as builder
+FROM rust:nightly-slim as builder
 
 # Set the working directory
 WORKDIR /usr/src/grabby
