@@ -29,7 +29,7 @@ RUN cargo build --release
 
 # --- Runner Stage ---
 # Use a minimal image for the final container
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 # Install runtime dependencies
 # yt-dlp is the core media downloader for grabby
