@@ -3,7 +3,10 @@
 # --- Builder Stage ---
 # Use an official Rust image as a builder.
 # We use -slim to keep the image size smaller.
-FROM rust:nightly-slim-bookworm as builder
+FROM rust:1.79-slim as builder
+
+# Install nightly toolchain
+RUN rustup update nightly && rustup toolchain install nightly && rustup default nightly
 
 # Set the working directory
 WORKDIR /usr/src/grabby
@@ -52,6 +55,8 @@ COPY config.example.toml /config.toml
 # Expose the port our web server will listen on.
 # This is crucial for Koyeb's health checks.
 EXPOSE 8000
+
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 # Set the command to run the application
 # It will look for config at /config.toml if CONFIG_FILE is not set
