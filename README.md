@@ -181,6 +181,30 @@ embed_enabled = true
 - `DISCORD_TOKEN`: Discord bot token (optional if set in config file)
 - `CONFIG_FILE`: Path to config file (optional)
 
+### Cookie File Configuration (for private content)
+
+To download media from sites that require a login, you need to provide a `cookies.txt` file (Netscape format). There are two ways to do this, designed for flexibility across different hosting platforms.
+
+#### Method 1: File-based (Recommended for Koyeb)
+
+This is the primary method if your hosting platform supports mounting secret files.
+
+1.  **Create a `cookies.txt` file** containing your cookies in Netscape format.
+2.  **Mount the file** into your container at a specific path (e.g., `/config/cookies.txt`).
+3.  **Set the `COOKIES_FILE_PATH` environment variable** to the path where the file is mounted.
+    -   **Name**: `COOKIES_FILE_PATH`
+    -   **Value**: `/config/cookies.txt`
+
+#### Method 2: Environment Variable Fallback (for Hugging Face, etc.)
+
+Use this method if your platform only allows passing secrets as environment variables.
+
+1.  **Create a `cookies.txt` file** as described above.
+2.  **Set the `COOKIES_FILE_PATH` environment variable** to the path where you want the cookie file to be created inside the container (e.g., `/config/cookies.txt`).
+3.  **Set the `APP_COOKIES_CONTENT` environment variable** and paste the **entire content** of your `cookies.txt` file as its value.
+
+The bot's startup script will automatically create the file at the specified path from the `APP_COOKIES_CONTENT` variable.
+
 ## Usage
 
 ### Slash Command

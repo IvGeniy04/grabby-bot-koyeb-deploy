@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Create a config directory if it doesn't exist
-mkdir -p /config
+mkdir -p "$(dirname "$COOKIES_FILE_PATH")"
 
-# Check if APP_COOKIES_CONTENT environment variable is set
-if [ -n "$APP_COOKIES_CONTENT" ]; then
-  echo "APP_COOKIES_CONTENT found, writing to /config/cookies.txt"
-  echo "$APP_COOKIES_CONTENT" > /config/cookies.txt
-  # Set COOKIES_FILE_PATH for the Rust application
-  export COOKIES_FILE_PATH="/config/cookies.txt"
+# Check if APP_COOKIES_CONTENT is provided and a path is set
+if [ -n "$APP_COOKIES_CONTENT" ] && [ -n "$COOKIES_FILE_PATH" ]; then
+  echo "APP_COOKIES_CONTENT found, writing to $COOKIES_FILE_PATH"
+  echo "$APP_COOKIES_CONTENT" > "$COOKIES_FILE_PATH"
+elif [ -n "$COOKIES_FILE_PATH" ]; then
+  echo "Using existing cookie file at $COOKIES_FILE_PATH (created by Koyeb file secret)"
 else
-  echo "APP_COOKIES_CONTENT not found, not creating cookies.txt"
+  echo "No cookie file configuration found, proceeding without cookies."
 fi
 
 # Execute the main application command
