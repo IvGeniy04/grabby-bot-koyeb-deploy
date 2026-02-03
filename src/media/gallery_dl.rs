@@ -86,12 +86,17 @@ impl GalleryDlDownloader {
             url
         );
 
+        let mut command = tokio::process::Command::new("gallery-dl");
+        command.arg("--resolve-json");
+
+        if let Ok(cookies_file) = std::env::var("COOKIES_FILE_PATH") {
+            command.arg("--cookies").arg(cookies_file);
+        }
+        command.arg(url);
+
         let output = tokio::time::timeout(
             std::time::Duration::from_secs(30),
-            tokio::process::Command::new("gallery-dl")
-                .arg("--resolve-json")
-                .arg(url)
-                .output(),
+            command.output(),
         )
         .await
         .context("Media metadata extraction timed out")?

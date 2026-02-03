@@ -32,16 +32,22 @@ impl YtDlpDownloader {
     async fn extract_metadata(&self, url: &str) -> Result<MediaMetadata> {
         debug!("Extracting metadata with yt-dlp for: {}", url);
 
+        let mut command = tokio::process::Command::new("yt-dlp");
+        command
+            .arg("--dump-json")
+            .arg("--no-download")
+            .arg("--no-warnings")
+            .arg("--user-agent")
+            .arg("\"foobar\"");
+
+        if let Ok(cookies_file) = std::env::var("COOKIES_FILE_PATH") {
+            command.arg("--cookies").arg(cookies_file);
+        }
+        command.arg(url);
+
         let output = tokio::time::timeout(
             std::time::Duration::from_secs(30),
-            tokio::process::Command::new("yt-dlp")
-                .arg("--dump-json")
-                .arg("--no-download")
-                .arg("--no-warnings")
-                .arg("--user-agent")
-                .arg("\"foobar\"")
-                .arg(url)
-                .output(),
+            command.output(),
         )
         .await
         .context("Media metadata extraction timed out")?
@@ -71,21 +77,27 @@ impl YtDlpDownloader {
     ) -> Result<Vec<MediaFile>> {
         info!("Downloading media with yt-dlp: {}", metadata.id);
 
+        let mut command = Command::new("yt-dlp");
+        command
+            .arg("--output")
+            .arg("-")
+            .arg("--format")
+            .arg("bestvideo[vcodec=h264]+bestaudio/best[vcodec=h264]/bestvideo[vcodec=avc1]+bestaudio/best[vcodec=avc1]/best")
+            .arg("--merge-output-format")
+            .arg("mp4")
+            .arg("--no-warnings")
+            .arg("--quiet")
+            .arg("--user-agent")
+            .arg("\"foobar\"");
+
+        if let Ok(cookies_file) = std::env::var("COOKIES_FILE_PATH") {
+            command.arg("--cookies").arg(cookies_file);
+        }
+        command.arg(url);
+
         let output = tokio::time::timeout(
             std::time::Duration::from_secs(120),
-            Command::new("yt-dlp")
-                .arg("--output")
-                .arg("-")
-                .arg("--format")
-                .arg("bestvideo[vcodec=h264]+bestaudio/best[vcodec=h264]/bestvideo[vcodec=avc1]+bestaudio/best[vcodec=avc1]/best")
-                .arg("--merge-output-format")
-                .arg("mp4")
-                .arg("--no-warnings")
-                .arg("--quiet")
-                .arg("--user-agent")
-                .arg("\"foobar\"")
-                .arg(url)
-                .output(),
+            command.output(),
         )
         .await
         .context("Media download timed out")?

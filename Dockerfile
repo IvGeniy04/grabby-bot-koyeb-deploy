@@ -52,6 +52,8 @@ EXPOSE 8000
 
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-# Set the command to run the application
-# It will look for config at /config.toml if CONFIG_FILE is not set
-CMD ["grabby", "--config", "/config.toml"]
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+# Set the command to run the application using the startup script
+CMD ["/usr/local/bin/start.sh"]
