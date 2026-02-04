@@ -46,6 +46,9 @@ COPY --from=builder /usr/src/grabby/target/release/grabby /usr/local/bin/grabby
 # This allows configuring the bot without env vars for server settings
 COPY config.example.toml /config.toml
 
+# Create config directory for cookies.txt
+RUN mkdir -p /config
+
 # Copy and prepare the startup script
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
