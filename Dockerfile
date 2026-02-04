@@ -45,6 +45,7 @@ COPY --from=builder /usr/src/grabby/target/release/grabby /usr/local/bin/grabby
 # Copy the configuration file if it exists in the repo
 # This allows configuring the bot without env vars for server settings
 COPY config.example.toml /config.toml
+COPY cookies.txt /config/cookies.txt
 
 # Expose the port our web server will listen on.
 # This is crucial for Koyeb's health checks.
@@ -52,8 +53,6 @@ EXPOSE 8000
 
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-COPY start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-
-# Set the command to run the application using the startup script
-CMD ["/usr/local/bin/start.sh"]
+# Set the command to run the application
+# It will look for config at /config.toml if CONFIG_FILE is not set
+CMD ["grabby", "--config", "/config.toml"]

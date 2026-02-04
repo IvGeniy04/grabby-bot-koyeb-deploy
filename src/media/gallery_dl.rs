@@ -87,12 +87,11 @@ impl GalleryDlDownloader {
         );
 
         let mut command = tokio::process::Command::new("gallery-dl");
-        command.arg("--resolve-json");
-
-        if let Ok(cookies_file) = std::env::var("COOKIES_FILE_PATH") {
-            command.arg("--cookies").arg(cookies_file);
-        }
-        command.arg(url);
+        command
+            .arg("--resolve-json")
+            .arg("--cookies")
+            .arg("/config/cookies.txt")
+            .arg(url);
 
         let output = tokio::time::timeout(
             std::time::Duration::from_secs(30),

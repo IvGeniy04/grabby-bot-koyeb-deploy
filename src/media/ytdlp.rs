@@ -38,12 +38,10 @@ impl YtDlpDownloader {
             .arg("--no-download")
             .arg("--no-warnings")
             .arg("--user-agent")
-            .arg("\"foobar\"");
-
-        if let Ok(cookies_file) = std::env::var("COOKIES_FILE_PATH") {
-            command.arg("--cookies").arg(cookies_file);
-        }
-        command.arg(url);
+            .arg("\"foobar\"")
+            .arg("--cookies")
+            .arg("/config/cookies.txt")
+            .arg(url);
 
         let output = tokio::time::timeout(
             std::time::Duration::from_secs(30),
@@ -88,12 +86,10 @@ impl YtDlpDownloader {
             .arg("--no-warnings")
             .arg("--quiet")
             .arg("--user-agent")
-            .arg("\"foobar\"");
-
-        if let Ok(cookies_file) = std::env::var("COOKIES_FILE_PATH") {
-            command.arg("--cookies").arg(cookies_file);
-        }
-        command.arg(url);
+            .arg("\"foobar\"")
+            .arg("--cookies")
+            .arg("/config/cookies.txt")
+            .arg(url);
 
         let output = tokio::time::timeout(
             std::time::Duration::from_secs(120),
